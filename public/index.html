@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Front Office Manager | Access & Postgres System</title>
+  <meta name="description" content="Next-generation Library Front Office management system with digital signature capture, student attendance, item circulation, and Microsoft Access integration.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <path d="M12 6v6"/>
+            <path d="M9 9h6"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>FrontOffice</h2>
+          <span class="badge-accent">ACCESS + POSTGRES</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="tab-overview" id="btn-nav-overview">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </span>
+          <span class="nav-label">Command Center</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-reception" id="btn-nav-reception">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          </span>
+          <span class="nav-label">Reception & Visits</span>
+          <span class="nav-counter" id="sidebar-present-count">0</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-loans" id="btn-nav-loans">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </span>
+          <span class="nav-label">Circulation / Loans</span>
+          <span class="nav-counter warn" id="sidebar-loans-count">0</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-students" id="btn-nav-students">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="nav-label">Student Directory</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-items" id="btn-nav-items">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </span>
+          <span class="nav-label">Asset Inventory</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-reports" id="btn-nav-reports">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span class="nav-label">Reports & Analytics</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-access" id="btn-nav-access">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M14 9h5"/><path d="M14 15h5"/></svg>
+          </span>
+          <span class="nav-label">MS Access & Sync</span>
+        </button>
+      </nav>
+
+      <!-- SYSTEM STATUS FOOTER -->
+      <div class="sidebar-footer">
+        <div class="status-indicator">
+          <span class="status-dot pulse"></span>
+          <div class="status-text">
+            <strong>PostgreSQL 16</strong>
+            <small id="db-health-text">Docker Connected :5434</small>
+          </div>
+        </div>
+        <div class="access-badge">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>LibraryFrontOffice.accdb</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="main-content">
+      <!-- TOP NAVIGATION BAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="page-title">Command Center</h1>
+          <span class="current-date" id="header-date">Loading...</span>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="quick-actions-bar">
+            <button class="btn btn-primary btn-sm" id="btn-quick-checkin">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              <span>Check In Student</span>
+            </button>
+            <button class="btn btn-outline btn-sm" id="btn-quick-issue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <span>Issue Resource</span>
+            </button>
+          </div>
+
+          <!-- Staff Selector Dropdown -->
+          <div class="staff-picker">
+            <label for="select-active-staff">Officer on Duty:</label>
+            <select id="select-active-staff" class="select-input">
+              <option value="Jane M. Doe (Head Librarian)">Jane M. Doe (Head Librarian)</option>
+              <option value="David K. Omondi (Circulation Officer)">David K. Omondi (Circulation Officer)</option>
+              <option value="Sarah N. Wambui (Reception Desk)">Sarah N. Wambui (Reception Desk)</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- TAB 1: COMMAND CENTER / OVERVIEW -->
+      <section id="tab-overview" class="tab-content active">
+        <!-- METRIC WIDGETS -->
+        <div class="metric-grid">
+          <div class="metric-card card-accent-cyan">
+            <div class="metric-header">
+              <span class="metric-title">Currently Present</span>
+              <div class="metric-badge live-pulse">LIVE</div>
+            </div>
+            <div class="metric-value" id="stat-currently-present">0</div>
+            <div class="metric-footer">
+              <span>Students currently in library</span>
+            </div>
+          </div>
+
+          <div class="metric-card card-accent-indigo">
+            <div class="metric-header">
+              <span class="metric-title">Visits Today</span>
+              <div class="metric-badge">TODAY</div>
+            </div>
+            <div class="metric-value" id="stat-visits-today">0</div>
+            <div class="metric-footer">
+              <span>Total attendance check-ins</span>
+            </div>
+          </div>
+
+          <div class="metric-card card-accent-amber">
+            <div class="metric-header">
+              <span class="metric-title">Active Loans Out</span>
+              <div class="metric-badge warn">CIRCULATION</div>
+            </div>
+            <div class="metric-value" id="stat-active-loans">0</div>
+            <div class="metric-footer">
+              <span>Books & devices currently issued</span>
+            </div>
+          </div>
+
+          <div class="metric-card card-accent-emerald">
+            <div class="metric-header">
+              <span class="metric-title">Available Assets</span>
+              <div class="metric-badge success">READY</div>
+            </div>
+            <div class="metric-value" id="stat-available-items">0</div>
+            <div class="metric-footer">
+              <span id="stat-total-items-text">0 total assets cataloged</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SPLIT LAYOUT: LIVE PRESENT FEED & CIRCULATION SNAPSHOT -->
+        <div class="overview-split">
+          <!-- Real-Time In-Library Students Card -->
+          <div class="card panel-present">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3>Students Currently in the Library</h3>
+                <span class="subtitle">Live reception roster from <code class="code-tag">qryCurrentlyPresent</code></span>
+              </div>
+              <div class="header-tools">
+                <button class="btn btn-secondary btn-sm" id="btn-refresh-present">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table" id="table-overview-present">
+                <thead>
+                  <tr>
+                    <th>Student Number</th>
+                    <th>Student Name</th>
+                    <th>School & Level</th>
+                    <th>Time Checked In</th>
+                    <th>Time Spent</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-overview-present">
+                  <tr><td colspan="6" class="text-center py-6 text-muted">Loading live attendance...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Active Loans Quick List -->
+          <div class="card panel-loans">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3>Active Loans Tracker</h3>
+                <span class="subtitle">Open circulation from <code class="code-tag">qryOpenLoans</code></span>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btn-open-issue-modal">
+                <span>+ Issue Resource</span>
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table" id="table-overview-loans">
+                <thead>
+                  <tr>
+                    <th>Asset Tag</th>
+                    <th>Resource Title</th>
+                    <th>Borrower</th>
+                    <th>Issued Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-overview-loans">
+                  <tr><td colspan="6" class="text-center py-6 text-muted">Loading active loans...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: RECEPTION & VISITS -->
+      <section id="tab-reception" class="tab-content">
+        <div class="section-header-banner">
+          <div>
+            <h2>Reception Desk & Attendance</h2>
+            <p>Check in students with digital signature capture, monitor live presence, and record check-outs.</p>
+          </div>
+          <div class="banner-actions">
+            <button class="btn btn-primary" id="btn-reception-checkin-direct">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              <span>Check In Student</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Student Search & Quick Check-In Bar -->
+        <div class="card card-search-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="reception-search-input" placeholder="Search student by Name or Student Number (e.g. STU-241001)...">
+          </div>
+          <div id="reception-search-results" class="search-results-dropdown hidden"></div>
+        </div>
+
+        <div class="tab-subsections">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3>Currently In Library (<span id="reception-present-counter">0</span>)</h3>
+                <span class="subtitle">Open visits awaiting check-out</span>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Visit #</th>
+                    <th>Student</th>
+                    <th>School</th>
+                    <th>Check-In Time</th>
+                    <th>Time Inside</th>
+                    <th>Signature</th>
+                    <th>Staff</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-reception-present">
+                  <tr><td colspan="8" class="text-center py-6 text-muted">No students currently in library.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card mt-6">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3>Today's Complete Attendance Log</h3>
+                <span class="subtitle">All check-ins and check-outs for today</span>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student Number</th>
+                    <th>Name</th>
+                    <th>School</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Duration</th>
+                    <th>Officer</th>
+                    <th>Signature</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-reception-today">
+                  <tr><td colspan="8" class="text-center py-6 text-muted">Loading attendance log...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: CIRCULATION / LOANS -->
+      <section id="tab-loans" class="tab-content">
+        <div class="section-header-banner">
+          <div>
+            <h2>Resource Circulation Desk</h2>
+            <p>Issue books, tablets, Kindles, and laptops to students; capture return condition and digital signatures.</p>
+          </div>
+          <div class="banner-actions">
+            <button class="btn btn-primary" id="btn-loans-issue-resource">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Issue New Loan</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h3>Currently Issued Items</h3>
+              <span class="subtitle">Outstanding loans from <code class="code-tag">qryOpenLoans</code></span>
+            </div>
+            <div class="filter-tools">
+              <input type="text" id="loans-filter-input" class="form-control form-control-sm" placeholder="Filter by asset or student...">
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Loan #</th>
+                  <th>Asset Tag</th>
+                  <th>Type & Title</th>
+                  <th>Student Borrower</th>
+                  <th>School</th>
+                  <th>Date Issued</th>
+                  <th>Due Date</th>
+                  <th>Condition Out</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-circulation-loans">
+                <tr><td colspan="9" class="text-center py-6 text-muted">Loading outstanding loans...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: STUDENT DIRECTORY -->
+      <section id="tab-students" class="tab-content">
+        <div class="section-header-banner">
+          <div>
+            <h2>Student Directory & Registration</h2>
+            <p>Manage student profiles with auto-generated student identifiers and full history view.</p>
+          </div>
+          <div class="banner-actions">
+            <button class="btn btn-primary" id="btn-open-register-student">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Register New Student</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h3>Registered Students (<span id="students-counter">0</span>)</h3>
+            </div>
+            <div class="filter-tools">
+              <input type="text" id="students-search-input" class="form-control form-control-sm" placeholder="Search by name, student number...">
+              <select id="students-school-filter" class="form-control form-control-sm">
+                <option value="">All Schools</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student Number</th>
+                  <th>Full Name</th>
+                  <th>School</th>
+                  <th>Level</th>
+                  <th>Gender</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-students-list">
+                <tr><td colspan="7" class="text-center py-6 text-muted">Loading student directory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: ASSET INVENTORY -->
+      <section id="tab-items" class="tab-content">
+        <div class="section-header-banner">
+          <div>
+            <h2>Library Asset & Resource Inventory</h2>
+            <p>Track books, Kindles, Android tablets, laptops, and study materials with unique asset tags.</p>
+          </div>
+          <div class="banner-actions">
+            <button class="btn btn-primary" id="btn-open-add-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Add New Asset</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h3>Cataloged Inventory (<span id="items-counter">0</span>)</h3>
+              <span class="subtitle">Live status from <code class="code-tag">qryItemAvailability</code></span>
+            </div>
+            <div class="filter-tools">
+              <select id="items-type-filter" class="form-control form-control-sm">
+                <option value="">All Types</option>
+                <option value="Book">Books</option>
+                <option value="Kindle">Kindles</option>
+                <option value="Tablet">Tablets</option>
+                <option value="Laptop">Laptops</option>
+                <option value="Other">Other</option>
+              </select>
+              <select id="items-status-filter" class="form-control form-control-sm">
+                <option value="">All Statuses</option>
+                <option value="AVAILABLE">Available</option>
+                <option value="ISSUED">Issued</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Asset Tag</th>
+                  <th>Type</th>
+                  <th>Title / Model</th>
+                  <th>Serial / ISBN</th>
+                  <th>Condition</th>
+                  <th>Availability</th>
+                  <th>Current Holder</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-items-list">
+                <tr><td colspan="8" class="text-center py-6 text-muted">Loading asset inventory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: REPORTS & ANALYTICS -->
+      <section id="tab-reports" class="tab-content">
+        <div class="section-header-banner">
+          <div>
+            <h2>Reports & Decision Support</h2>
+            <p>Access-compatible reports for daily attendance, school breakdowns, outstanding items, and audit logs.</p>
+          </div>
+          <div class="banner-actions">
+            <button class="btn btn-secondary" onclick="window.print()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <span>Print Report</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="reports-grid">
+          <!-- Attendance By School (qryAttendanceBySchool) -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3>Attendance Summary by School</h3>
+                <span class="subtitle">From <code class="code-tag">qryAttendanceBySchool</code></span>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>School Name</th>
+                    <th>Total Visits</th>
+                    <th>Unique Students</th>
+                    <th>Last Visit</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-report-school">
+                  <tr><td colspan="4" class="text-center py-4 text-muted">Loading school breakdown...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Outstanding / Overdue Resources -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3>Outstanding Resources Report</h3>
+                <span class="subtitle">From <code class="code-tag">rptOutstandingItems</code></span>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Asset Tag</th>
+                    <th>Resource</th>
+                    <th>Student</th>
+                    <th>Days Out</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-report-outstanding">
+                  <tr><td colspan="5" class="text-center py-4 text-muted">Loading outstanding resources...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Complete Loan History Log -->
+          <div class="card full-width">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3>Complete Circulation History Log</h3>
+                <span class="subtitle">Complete audit trail of all issues and returns (<code class="code-tag">rptLoanHistory</code>)</span>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="exportData('loans')">Export CSV</button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Asset Tag & Title</th>
+                    <th>Date Issued</th>
+                    <th>Date Returned</th>
+                    <th>Condition Out/In</th>
+                    <th>Staff Out/In</th>
+                    <th>Signatures</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-report-history">
+                  <tr><td colspan="8" class="text-center py-4 text-muted">Loading circulation history...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: MS ACCESS INTEGRATION & SYNC -->
+      <section id="tab-access" class="tab-content">
+        <div class="section-header-banner">
+          <div>
+            <h2>Microsoft Access & Docker PostgreSQL Hub</h2>
+            <p>Seamless two-way architecture: Run the high-performance PostgreSQL backend or native MS Access desktop client.</p>
+          </div>
+        </div>
+
+        <div class="access-hub-grid">
+          <!-- MS Access Database Card -->
+          <div class="card highlight-card">
+            <div class="hub-icon-header">
+              <div class="hub-icon access">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17V7l5 5 5-5v10"/></svg>
+              </div>
+              <div>
+                <h3>LibraryFrontOffice.accdb</h3>
+                <p class="text-muted">Native Microsoft Access 2016-2024 Database</p>
+              </div>
+            </div>
+            <p class="hub-desc">
+              A complete Microsoft Access file has been automatically generated with the exact schemas, 
+              validation rules, unique indexes, queries (<code class="code-tag">qryVisitsToday</code>, <code class="code-tag">qryCurrentlyPresent</code>, etc.), 
+              and the full VBA workflow module (<code class="code-tag">mdlLibraryWorkflows</code>).
+            </p>
+            <div class="hub-actions">
+              <div class="badge-tag">File Ready on Host: <code>.\LibraryFrontOffice.accdb</code></div>
+            </div>
+          </div>
+
+          <!-- Docker PostgreSQL Card -->
+          <div class="card">
+            <div class="hub-icon-header">
+              <div class="hub-icon postgres">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+              </div>
+              <div>
+                <h3>Docker PostgreSQL 16 Service</h3>
+                <p class="text-muted">Containerized High-Availability Database</p>
+              </div>
+            </div>
+            <p class="hub-desc">
+              Runs in Docker container <code class="code-tag">library_postgres</code> on host port <code>5434</code>. 
+              Equipped with referential integrity constraints, automated timestamps, and pre-seeded realistic schools and inventory.
+            </p>
+            <div class="connection-details">
+              <div><strong>Host:</strong> localhost</div>
+              <div><strong>Port:</strong> 5434</div>
+              <div><strong>Database:</strong> library_front_office</div>
+              <div><strong>User:</strong> library_user</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Center for Access / Excel -->
+        <div class="card mt-6">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h3>One-Click Data Sync & Export</h3>
+              <span class="subtitle">Export live PostgreSQL records directly into Microsoft Access or Excel format</span>
+            </div>
+          </div>
+          <div class="export-buttons-grid">
+            <button class="btn btn-outline" onclick="exportData('students')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Students CSV</span>
+            </button>
+            <button class="btn btn-outline" onclick="exportData('visits')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Visits CSV</span>
+            </button>
+            <button class="btn btn-outline" onclick="exportData('loans')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Loans CSV</span>
+            </button>
+            <button class="btn btn-outline" onclick="exportData('items')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Items CSV</span>
+            </button>
+            <button class="btn btn-outline" onclick="exportData('schools')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Schools CSV</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- MODAL: CHECK IN STUDENT WITH DIGITAL SIGNATURE -->
+  <div id="modal-checkin" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Student Reception Check-In</h3>
+          <p class="subtitle">Record arrival time & capture digital signature</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-checkin')">&times;</button>
+      </div>
+      <form id="form-checkin">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="checkin-student-select">Select Student <span class="required">*</span></label>
+            <select id="checkin-student-select" class="form-control" required>
+              <option value="">-- Choose registered student --</option>
+            </select>
+            <small class="helper-text">Only active students who are not already inside can be checked in.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="checkin-notes">Visit Purpose / Notes</label>
+            <input type="text" id="checkin-notes" class="form-control" placeholder="e.g. Science research, homework study, book return">
+          </div>
+
+          <!-- SIGNATURE PAD -->
+          <div class="signature-section">
+            <div class="signature-header">
+              <label>Digital Signature Capture (Canvas)</label>
+              <button type="button" class="btn btn-text btn-sm" id="btn-clear-checkin-sig">Clear Pad</button>
+            </div>
+            <div class="signature-canvas-container">
+              <canvas id="checkin-signature-canvas" width="460" height="140"></canvas>
+              <div class="canvas-watermark">Sign with mouse or stylus here</div>
+            </div>
+            <small class="helper-text">Signatures are automatically saved as PNG files and linked to the visit record.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-checkin')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-checkin">Confirm Check-In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ISSUE RESOURCE WITH SIGNATURE -->
+  <div id="modal-issue" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Issue Library Resource</h3>
+          <p class="subtitle">Assign item to student and capture issue signature</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-issue')">&times;</button>
+      </div>
+      <form id="form-issue">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="issue-student-select">Borrower Student <span class="required">*</span></label>
+            <select id="issue-student-select" class="form-control" required>
+              <option value="">-- Select student --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="issue-item-select">Available Asset / Book / Device <span class="required">*</span></label>
+            <select id="issue-item-select" class="form-control" required>
+              <option value="">-- Select available resource --</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="issue-due-date">Due Return Date</label>
+              <input type="date" id="issue-due-date" class="form-control">
+            </div>
+            <div class="form-group col-6">
+              <label for="issue-condition">Condition Out</label>
+              <select id="issue-condition" class="form-control">
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Minor Wear">Minor Wear</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="issue-notes">Issue Remarks</label>
+            <input type="text" id="issue-notes" class="form-control" placeholder="Optional notes (e.g. includes charger cable)">
+          </div>
+
+          <!-- SIGNATURE PAD -->
+          <div class="signature-section">
+            <div class="signature-header">
+              <label>Borrower Acknowledgment Signature</label>
+              <button type="button" class="btn btn-text btn-sm" id="btn-clear-issue-sig">Clear Pad</button>
+            </div>
+            <div class="signature-canvas-container">
+              <canvas id="issue-signature-canvas" width="460" height="140"></canvas>
+              <div class="canvas-watermark">Borrower signs here</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-issue')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-issue">Issue Resource</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: RETURN RESOURCE -->
+  <div id="modal-return" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Return Library Resource</h3>
+          <p class="subtitle" id="return-modal-subtitle">Record return inspection & update inventory status</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-return')">&times;</button>
+      </div>
+      <form id="form-return">
+        <input type="hidden" id="return-loan-id">
+        <div class="modal-body">
+          <div class="return-item-summary card mb-4">
+            <div id="return-summary-content">Loading loan details...</div>
+          </div>
+
+          <div class="form-group">
+            <label for="return-condition">Condition Upon Return <span class="required">*</span></label>
+            <select id="return-condition" class="form-control" required>
+              <option value="Good">Good (No new issues)</option>
+              <option value="Fair">Fair (Normal usage)</option>
+              <option value="Minor Wear">Minor Wear</option>
+              <option value="Damaged">Damaged (Requires attention)</option>
+              <option value="Missing parts">Missing parts / accessories</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="return-notes">Return Inspection Notes</label>
+            <input type="text" id="return-notes" class="form-control" placeholder="Condition remarks, fine notes, or observations">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-return')">Cancel</button>
+          <button type="submit" class="btn btn-success" id="btn-submit-return">Confirm Return</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTER NEW STUDENT -->
+  <div id="modal-register-student" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Register New Student</h3>
+          <p class="subtitle">Add student profile to database</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-register-student')">&times;</button>
+      </div>
+      <form id="form-register-student">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="reg-student-number">Student Number</label>
+            <div class="input-with-button">
+              <input type="text" id="reg-student-number" class="form-control font-mono" placeholder="STU-YYMMDD-HHMMSS">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-gen-stu-num">Generate</button>
+            </div>
+            <small class="helper-text">Leave blank to automatically generate unique identifier.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-fullname">Full Name <span class="required">*</span></label>
+            <input type="text" id="reg-fullname" class="form-control" required placeholder="e.g. Faith Mwangi">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="reg-school">School <span class="required">*</span></label>
+              <select id="reg-school" class="form-control" required>
+                <option value="">-- Select School --</option>
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label for="reg-level">School Level</label>
+              <select id="reg-level" class="form-control">
+                <option value="Form 1">Form 1</option>
+                <option value="Form 2">Form 2</option>
+                <option value="Form 3">Form 3</option>
+                <option value="Form 4">Form 4</option>
+                <option value="Grade 9">Grade 9</option>
+                <option value="Senior School">Senior School</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-gender">Gender</label>
+            <select id="reg-gender" class="form-control">
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+              <option value="Not recorded">Not recorded</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-notes">Notes / Special Interests</label>
+            <input type="text" id="reg-notes" class="form-control" placeholder="e.g. Science club, reading focus">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-register-student')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD ASSET / ITEM -->
+  <div id="modal-add-item" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Add Library Asset</h3>
+          <p class="subtitle">Register book, tablet, Kindle, or laptop</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-add-item')">&times;</button>
+      </div>
+      <form id="form-add-item">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="item-asset-tag">Asset Tag <span class="required">*</span></label>
+              <input type="text" id="item-asset-tag" class="form-control font-mono" required placeholder="e.g. AST-BK-009 or AST-KD-105">
+            </div>
+            <div class="form-group col-6">
+              <label for="item-type">Item Type <span class="required">*</span></label>
+              <select id="item-type" class="form-control" required>
+                <option value="Book">Book</option>
+                <option value="Kindle">Kindle</option>
+                <option value="Tablet">Tablet</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="item-title">Title / Model Description <span class="required">*</span></label>
+            <input type="text" id="item-title" class="form-control" required placeholder="e.g. Introduction to Algorithms or Samsung Galaxy Tab A8">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="item-serial">Serial Number / ISBN</label>
+              <input type="text" id="item-serial" class="form-control" placeholder="e.g. ISBN-978... or SN-...">
+            </div>
+            <div class="form-group col-6">
+              <label for="item-condition">Initial Condition</label>
+              <select id="item-condition" class="form-control">
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Minor Wear">Minor Wear</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="item-notes">Notes</label>
+            <input type="text" id="item-notes" class="form-control" placeholder="Storage location, accessories, or shelf position">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-item')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Asset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: STUDENT HISTORY DRAWER -->
+  <div id="modal-student-history" class="modal-backdrop hidden">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3 id="hist-student-name">Student Profile</h3>
+          <p class="subtitle" id="hist-student-sub">Historical attendance & circulation</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modal-student-history')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="history-tabs-container">
+          <div class="tab-links">
+            <button class="tab-link active" onclick="switchHistTab('hist-visits')">Attendance Visits</button>
+            <button class="tab-link" onclick="switchHistTab('hist-loans')">Loan History</button>
+          </div>
+
+          <div id="hist-visits" class="hist-tab-panel active">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Visit Date</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Officer</th>
+                    <th>Signature</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-student-visits">
+                  <tr><td colspan="5" class="text-center py-4 text-muted">No visits recorded.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="hist-loans" class="hist-tab-panel">
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Resource</th>
+                    <th>Issued</th>
+                    <th>Due</th>
+                    <th>Returned</th>
+                    <th>Condition Out/In</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-student-loans">
+                  <tr><td colspan="5" class="text-center py-4 text-muted">No loans recorded.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-student-history')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

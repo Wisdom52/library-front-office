@@ -1,0 +1,17 @@
+{
+  "name": "library-front-office",
+  "version": "1.0.0",
+  "description": "Library Front Office Management System with Docker PostgreSQL & Access Integration",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "build:access": "powershell -ExecutionPolicy Bypass -File ./build_access_db.ps1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}

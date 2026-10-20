@@ -1,0 +1,109 @@
+' LIBRARY FRONT OFFICE MANAGER — VBA STARTER CODE
+' Paste relevant procedures into standard modules/forms in Access.
+' Requires Microsoft Access on Windows. Save signature PNG files in a restricted folder such as:
+' C:\LibraryFrontOffice\Signatures\
+' Create this folder before using the signature capture routine.
+'
+' SAFETY: Use an Access form with an image control named imgSignature and a command button named cmdSaveSignature.
+' Access does not natively provide a signature drawing pad. This helper saves a PNG produced by a trusted
+' signature pad / drawing control or selected image file. For actual mouse-drawn signatures, add a vetted
+' signature-capture ActiveX/control or use a local HTML canvas form; do not treat a typed name as a signature.
+'
+Option Compare Database
+Option Explicit
+
+Public Function MakeStudentNumber() As String
+    ' Human-friendly ID generator; use only when creating a new student.
+    MakeStudentNumber = "STU-" & Format(Now(), "yymmdd-hhnnss")
+End Function
+
+Public Function HasOpenVisit(ByVal studentID As Long) As Boolean
+    HasOpenVisit = (DCount("*", "Visits", "StudentID=" & studentID & " AND CheckOutTime Is Null") > 0)
+End Function
+
+Public Function HasOpenLoan(ByVal itemID As Long) As Boolean
+    HasOpenLoan = (DCount("*", "Loans", "ItemID=" & itemID & " AND DateReturned Is Null") > 0)
+End Function
+
+Public Function ItemAvailability(ByVal itemID As Long) As String
+    If HasOpenLoan(itemID) Then
+        ItemAvailability = "ISSUED"
+    Else
+        ItemAvailability = "AVAILABLE"
+    End If
+End Function
+
+Public Sub CheckInStudent(ByVal studentID As Long, Optional ByVal staffName As String = "")
+    If DCount("*", "Students", "StudentID=" & studentID & " AND IsActive=True") = 0 Then
+        MsgBox "Student record not found or inactive.", vbExclamation
+        Exit Sub
+    End If
+    If HasOpenVisit(studentID) Then
+        MsgBox "This student already has an open visit. Check them out before checking in again.", vbExclamation
+        Exit Sub
+    End If
+    CurrentDb.Execute _
+        "INSERT INTO Visits (StudentID, CheckInTime, CheckInStaff) VALUES (" & _
+        studentID & ", Now(), '" & Replace(staffName, "'", "''") & "')", dbFailOnError
+    MsgBox "Student checked in at " & Format(Now(), "hh:nn"), vbInformation
+End Sub
+
+Public Sub CheckOutStudent(ByVal visitID As Long, Optional ByVal staffName As String = "")
+    If DCount("*", "Visits", "VisitID=" & visitID & " AND CheckOutTime Is Null") = 0 Then
+        MsgBox "Open visit not found.", vbExclamation
+        Exit Sub
+    End If
+    CurrentDb.Execute _
+        "UPDATE Visits SET CheckOutTime=Now(), CheckOutStaff='" & _
+        Replace(staffName, "'", "''") & "' WHERE VisitID=" & visitID, dbFailOnError
+    MsgBox "Student checked out at " & Format(Now(), "hh:nn"), vbInformation
+End Sub
+
+Public Sub IssueItem(ByVal studentID As Long, ByVal itemID As Long, _
+                     Optional ByVal visitID As Variant, Optional ByVal staffName As String = "")
+    If DCount("*", "Students", "StudentID=" & studentID & " AND IsActive=True") = 0 Then
+        MsgBox "Student record not found or inactive.", vbExclamation
+        Exit Sub
+    End If
+    If DCount("*", "Items", "ItemID=" & itemID & " AND IsActive=True") = 0 Then
+        MsgBox "Item not found or inactive.", vbExclamation
+        Exit Sub
+    End If
+    If HasOpenLoan(itemID) Then
+        MsgBox "This item is already issued and has not been returned.", vbExclamation
+        Exit Sub
+    End If
+    If IsMissing(visitID) Or IsNull(visitID) Or visitID = "" Then
+        CurrentDb.Execute _
+          "INSERT INTO Loans (StudentID, ItemID, DateIssued, IssuedBy) VALUES (" & _
+          studentID & ", " & itemID & ", Now(), '" & Replace(staffName, "'", "''") & "')", dbFailOnError
+    Else
+        CurrentDb.Execute _
+          "INSERT INTO Loans (StudentID, ItemID, VisitID, DateIssued, IssuedBy) VALUES (" & _
+          studentID & ", " & itemID & ", " & CLng(visitID) & ", Now(), '" & _
+          Replace(staffName, "'", "''") & "')", dbFailOnError
+    End If
+    MsgBox "Item issued successfully.", vbInformation
+End Sub
+
+Public Sub ReturnItem(ByVal loanID As Long, Optional ByVal staffName As String = "")
+    If DCount("*", "Loans", "LoanID=" & loanID & " AND DateReturned Is Null") = 0 Then
+        MsgBox "Outstanding loan not found.", vbExclamation
+        Exit Sub
+    End If
+    CurrentDb.Execute _
+      "UPDATE Loans SET DateReturned=Now(), ReceivedBy='" & Replace(staffName, "'", "''") & _
+      "' WHERE LoanID=" & loanID, dbFailOnError
+    MsgBox "Item return recorded.", vbInformation
+End Sub
+
+Public Sub SaveSignaturePath(ByVal visitID As Long, ByVal signatureFile As String)
+    ' Use after a real digital signature PNG has been captured by a drawing control.
+    If Len(Dir(signatureFile)) = 0 Then
+        MsgBox "Signature file not found.", vbExclamation
+        Exit Sub
+    End If
+    CurrentDb.Execute _
+      "UPDATE Visits SET SignaturePath='" & Replace(signatureFile, "'", "''") & _
+      "', SignatureCapturedAt=Now() WHERE VisitID=" & visitID, dbFailOnError
+End Sub
